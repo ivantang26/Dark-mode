@@ -1,0 +1,66 @@
+import Link from "next/link";
+import CodeTabs from "@/components/CodeTabs";
+import Step from "@/components/Step";
+import ApiKeyLink from "@/components/ApiKeyLink";
+import { install, setKey, firstCall } from "@/lib/snippets";
+
+export const metadata = {
+  title: "Quickstart",
+  description: "Get an API key, install an SDK and make your first streamed request in three steps.",
+};
+
+<p className="eyebrow">docs · quickstart</p>
+
+# Make your first request
+
+Three steps and about three minutes. You'll stream a response from **Synapse Flash**, our fastest general model. Pick your language in any code block; the rest of the docs will follow.
+
+<Step n={1}>
+
+## Get an API key
+
+Sign up with email or GitHub. Your first key is created for you and shown once, so copy it somewhere safe. Free accounts get $5 of credit every month, no card needed.
+
+<div className="my-6 flex flex-wrap gap-3">
+  <ApiKeyLink model="syn-flash" />
+</div>
+
+Then export it in your shell. The SDKs read `SYNAPSE_API_KEY` automatically.
+
+<CodeTabs snippet={setKey} title="Set your key" where="quickstart-1" />
+
+</Step>
+
+<Step n={2}>
+
+## Install the SDK
+
+Official SDKs for Python 3.9+, Node 18+ and Go 1.22+. They're thin wrappers over plain HTTPS, so cURL works too.
+
+<CodeTabs snippet={install} title="Install" where="quickstart-2" />
+
+</Step>
+
+<Step n={3}>
+
+## Make your first call
+
+This streams tokens as they're generated. The first one should arrive in about 120ms.
+
+<CodeTabs snippet={firstCall()} title="First request" where="quickstart-3" />
+
+You should see something like:
+
+```text
+Latency: the pause between asking and knowing.
+```
+
+</Step>
+
+## What next
+
+- Swap `syn-flash` for any model in the <Link href="/models">catalogue</Link>. Nothing else changes.
+- Learn how events are framed in <Link href="/docs/streaming">Streaming</Link>.
+- Let the model call your code with <Link href="/docs/function-calling">Function calling</Link>.
+- Handle `429`s gracefully: <Link href="/docs/errors-and-limits">Errors and rate limits</Link>.
+- Estimate a month of traffic with the <Link href="/pricing#calculator">cost calculator</Link>.

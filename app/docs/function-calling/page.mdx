@@ -1,0 +1,39 @@
+import CodeTabs from "@/components/CodeTabs";
+import { functionCalling } from "@/lib/snippets";
+
+export const metadata = {
+  title: "Function calling",
+  description: "Describe tools with JSON Schema and let Synapse models call them.",
+};
+
+<p className="eyebrow">docs · guides</p>
+
+# Function calling
+
+Describe your functions with JSON Schema and the model decides when to call them. Arguments are validated against the schema before they reach you.
+
+## Declaring tools
+
+Each tool has a `name`, a `description` the model reads, and `parameters` as a JSON Schema object.
+
+<CodeTabs snippet={functionCalling} title="Tool call" where="function-calling" />
+
+## Returning results
+
+Run the function yourself, then send the result back as a `tool` message with the same `tool_call_id`. The model continues from there.
+
+```json
+{
+  "role": "tool",
+  "tool_call_id": "call_41xq",
+  "content": "{\"temp_c\": 22, \"sky\": \"clear\"}"
+}
+```
+
+## Parallel calls
+
+Flash, Code, Pro and Ultra can return several tool calls in one turn. Run them concurrently and return every result before the next request.
+
+## Forcing a tool
+
+Set `tool_choice` to a tool name to force that call, or to `"none"` to stop the model calling tools at all.

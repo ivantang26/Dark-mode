@@ -1,0 +1,783 @@
+@import "tailwindcss";
+
+/*
+ * Synapse design tokens.
+ * Semantic custom properties live on :root so a light theme can later redefine them
+ * under [data-theme="light"] without touching a single component. Tailwind reads
+ * them through @theme inline, so utilities like bg-surface-1 follow the theme too.
+ * scripts/check-contrast.ts parses this block, so keep values as hex or rgba().
+ */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #07070b;
+  --surface-1: #0e0e15;
+  --surface-2: #16161f;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --text: #ededf2;
+  --text-mute: #9a9aaf;
+  --neon-violet: #8b5cf6;
+  --neon-violet-soft: #b79cff;
+  --neon-cyan: #22d3ee;
+  --neon-lime: #a3e635;
+  --danger: #fb7185;
+  --on-light: #07070b;
+
+  --glow: 0 0 40px rgba(139, 92, 246, 0.45);
+  --glow-cyan: 0 0 24px rgba(34, 211, 238, 0.35);
+  --gradient-brand: linear-gradient(100deg, #a78bfa 0%, #8b5cf6 30%, #22d3ee 100%);
+
+  --radius: 14px;
+  --radius-sm: 8px;
+  --gutter: 16px;
+  --max: 1200px;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--text);
+  --color-mute: var(--text-mute);
+  --color-violet: var(--neon-violet);
+  --color-violet-soft: var(--neon-violet-soft);
+  --color-cyan: var(--neon-cyan);
+  --color-lime: var(--neon-lime);
+  --color-danger: var(--danger);
+  --color-on-light: var(--on-light);
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --text-display: clamp(2.5rem, 1.15rem + 5.6vw, 6rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.045em;
+  --text-h2: clamp(1.75rem, 1.15rem + 2.5vw, 3.25rem);
+  --text-h2--line-height: 1.08;
+  --text-h2--letter-spacing: -0.03em;
+  --text-h3: clamp(1.125rem, 1.05rem + 0.35vw, 1.375rem);
+  --text-h3--line-height: 1.3;
+
+  --shadow-glow: var(--glow);
+  --radius-card: var(--radius);
+}
+
+/* Base and component layers sit below Tailwind utilities, so a utility class always wins. */
+@layer base {
+  /* ---------- Base ---------- */
+
+  html {
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 88px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: rgba(139, 92, 246, 0.45);
+    color: var(--text);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Links in running copy: cyan, 10.9:1 on bg. */
+  .prose-link,
+  .prose a:not(.btn) {
+    color: var(--neon-cyan);
+    text-decoration: underline;
+    text-decoration-color: rgba(34, 211, 238, 0.4);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 200ms;
+  }
+  .prose-link:hover,
+  .prose a:not(.btn):hover {
+    text-decoration-color: var(--neon-cyan);
+  }
+
+  /* Focus ring: 2px cyan outline plus a 4px glow, on every interactive element. */
+  :focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+    box-shadow: 0 0 4px 4px rgba(34, 211, 238, 0.35);
+    border-radius: 6px;
+  }
+
+  .skip-link {
+    position: fixed;
+    left: 16px;
+    top: -100px;
+    z-index: 100;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--text);
+    color: var(--on-light);
+    font-weight: 600;
+  }
+  .skip-link:focus {
+    top: 16px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .container-x {
+    width: 100%;
+    max-width: var(--max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+  @media (min-width: 768px) {
+    :root {
+      --gutter: 32px;
+    }
+  }
+
+  /* Mono labels, numbers and code: 13px → 15px. */
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  @media (min-width: 768px) {
+    .mono {
+      font-size: 14px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .mono {
+      font-size: 15px;
+    }
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+  .eyebrow::before {
+    content: "// ";
+    color: var(--neon-violet-soft);
+  }
+}
+
+@layer components {
+  /* ---------- Display headline: gradient fill with a solid fallback ---------- */
+
+  .display {
+    font-size: var(--text-display);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+    color: var(--text);
+    text-wrap: balance;
+  }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .gradient-text {
+      background: linear-gradient(100deg, #c4b5fd 0%, #a78bfa 28%, #22d3ee 92%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      /* Keeps descenders inside the painted box. */
+      padding-bottom: 0.08em;
+    }
+  }
+  @media (forced-colors: active) {
+    .gradient-text {
+      background: none;
+      color: CanvasText;
+    }
+  }
+
+  .h2 {
+    font-size: var(--text-h2);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  /* ---------- Texture: grain, grid, aurora ---------- */
+
+  /* Film grain: one inline SVG turbulence tile (~400 bytes), tiled at 4% across the page. */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+
+  /* Grid lines: hidden on phones, 48px on tablets, 64px on desktop. Fades out radially. */
+  .grid-lines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+    --cell: 48px;
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: var(--cell) var(--cell);
+    background-position: center top;
+    -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 35%, #000 20%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 65% at 50% 35%, #000 20%, transparent 75%);
+  }
+  @media (min-width: 768px) {
+    .grid-lines {
+      display: block;
+    }
+  }
+  @media (min-width: 1024px) {
+    .grid-lines {
+      --cell: 64px;
+    }
+  }
+
+  /* Aurora: oversized soft gradients drifting over 20s. Transform-only, so it stays on the compositor. */
+  .aurora {
+    position: absolute;
+    pointer-events: none;
+    inset: -10% -20% auto -20%;
+    height: 520px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent);
+    mask-image: linear-gradient(to bottom, #000 40%, transparent);
+  }
+  .aurora::before,
+  .aurora::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background:
+      radial-gradient(30% 35% at 35% 45%, rgba(139, 92, 246, 0.42), transparent 70%),
+      radial-gradient(28% 30% at 62% 40%, rgba(34, 211, 238, 0.26), transparent 70%),
+      radial-gradient(20% 25% at 50% 60%, rgba(167, 139, 250, 0.2), transparent 70%);
+    animation: aurora-drift 20s ease-in-out infinite alternate;
+  }
+  .aurora::after {
+    background: radial-gradient(22% 26% at 70% 55%, rgba(139, 92, 246, 0.22), transparent 70%);
+    animation-duration: 26s;
+    animation-direction: alternate-reverse;
+  }
+  @media (min-width: 1024px) {
+    .aurora {
+      height: 900px;
+    }
+  }
+  @keyframes aurora-drift {
+    0% {
+      transform: translate3d(-6%, 0, 0) rotate(0deg) scale(1);
+    }
+    50% {
+      transform: translate3d(4%, 3%, 0) rotate(8deg) scale(1.08);
+    }
+    100% {
+      transform: translate3d(8%, -2%, 0) rotate(-6deg) scale(1);
+    }
+  }
+
+  /* ---------- Surfaces and cards ---------- */
+
+  .card {
+    position: relative;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  /*
+   * Spotlight border (FR-6): the gradient sits in ::before, masked to a 1px ring.
+   * components/Effects.tsx writes --mx/--my from the pointer. Off on touch and reduced motion.
+   */
+  .spotlight {
+    --mx: 50%;
+    --my: 50%;
+    isolation: isolate;
+  }
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(260px circle at var(--mx) var(--my), rgba(183, 156, 255, 0.95), rgba(34, 211, 238, 0.55) 35%, transparent 70%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    opacity: 0;
+    transition: opacity 200ms ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(360px circle at var(--mx) var(--my), rgba(139, 92, 246, 0.07), transparent 60%);
+    opacity: 0;
+    transition: opacity 200ms ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .spotlight:hover::before,
+    .spotlight:hover::after {
+      opacity: 1;
+    }
+  }
+
+  /* ---------- Buttons ---------- */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      box-shadow 200ms ease,
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease;
+    cursor: pointer;
+  }
+  .btn-sm {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+  .btn-primary {
+    background: var(--text);
+    color: var(--on-light);
+  }
+  .btn-primary:hover {
+    box-shadow: var(--glow);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--line-strong);
+  }
+  .btn-secondary:hover {
+    background: var(--surface-2);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+  .btn-ghost {
+    color: var(--text-mute);
+    padding: 0 10px;
+  }
+  .btn-ghost:hover {
+    color: var(--text);
+  }
+  .btn[aria-disabled="true"],
+  .btn:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* ---------- Metric pill ---------- */
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(14, 14, 21, 0.7);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-mute);
+    white-space: nowrap;
+  }
+  .pill strong {
+    color: var(--text);
+    font-weight: 400;
+  }
+  .dot {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--neon-lime);
+    box-shadow: 0 0 8px rgba(163, 230, 53, 0.7);
+  }
+  .dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--neon-lime);
+    animation: pulse 2s ease-out infinite;
+  }
+  .dot[data-state="down"] {
+    background: var(--text-mute);
+    box-shadow: none;
+  }
+  .dot[data-state="down"]::after {
+    display: none;
+  }
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    70%,
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+
+  /* ---------- Code blocks (Shiki output) ---------- */
+
+  .code {
+    position: relative;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    /* Never let code push the page sideways (acceptance: no page scroll at 360px). */
+    min-width: 0;
+    max-width: 100%;
+  }
+  .code pre,
+  pre.code-pre {
+    margin: 0;
+    overflow-x: auto;
+    padding: 18px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    tab-size: 2;
+    background: transparent !important;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  .code pre code {
+    font-family: inherit;
+    display: block;
+    width: max-content;
+    min-width: 100%;
+  }
+  @media (min-width: 768px) {
+    .code pre,
+    pre.code-pre {
+      font-size: 14px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .code pre,
+    pre.code-pre {
+      font-size: 15px;
+    }
+  }
+
+  /* Inline code in prose. */
+  :not(pre) > code.inline {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 0.15em 0.4em;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+  }
+
+  /* Scrollable tab row on phones. */
+  .tab-row {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-row::-webkit-scrollbar {
+    display: none;
+  }
+  .tab {
+    position: relative;
+    flex: none;
+    padding: 12px 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-mute);
+    transition: color 200ms;
+  }
+  .tab:hover {
+    color: var(--text);
+  }
+  .tab[aria-selected="true"] {
+    color: var(--text);
+  }
+  .tab[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--gradient-brand);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.8);
+  }
+
+  /* ---------- Section heading reveal (300ms clip-path wipe) ---------- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    html.js [data-reveal] {
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 300ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    html.js [data-reveal].is-in {
+      clip-path: inset(0 -1% -10% 0);
+    }
+  }
+
+  /* ---------- Forms ---------- */
+
+  .field {
+    display: grid;
+    gap: 6px;
+  }
+  .label {
+    font-size: 14px;
+    color: var(--text-mute);
+  }
+  .input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    font: inherit;
+    font-size: 16px;
+    transition: border-color 200ms, box-shadow 200ms;
+  }
+  .input:hover {
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+  .input:focus-visible {
+    border-color: var(--neon-cyan);
+    border-radius: var(--radius-sm);
+  }
+  select.input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%239a9aaf' stroke-width='1.6'%3E%3Cpath d='m1 1.5 5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+  }
+  .input[aria-invalid="true"] {
+    border-color: var(--danger);
+  }
+
+  input[type="range"].range {
+    width: 100%;
+    accent-color: var(--neon-violet);
+    height: 24px;
+  }
+
+  .check {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--neon-violet);
+  }
+
+  /* ---------- Prose (MDX docs) ---------- */
+
+  .prose {
+    color: var(--text);
+    max-width: 72ch;
+  }
+  .prose > * + *,
+  .prose > section > * + * {
+    margin-top: 1.1em;
+  }
+  .prose h1 {
+    font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+  .prose h2 {
+    margin-top: 2.4em;
+    font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .prose h3 {
+    margin-top: 1.8em;
+    font-size: 1.15em;
+    font-weight: 600;
+  }
+  .prose p,
+  .prose li {
+    color: #cfcfdb;
+  }
+  .prose ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  .prose ul li {
+    position: relative;
+    padding-left: 1.3em;
+  }
+  .prose ul li + li {
+    margin-top: 0.4em;
+  }
+  .prose ul li::before {
+    content: "";
+    position: absolute;
+    left: 0.2em;
+    top: 0.72em;
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--neon-violet-soft);
+  }
+  .prose strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  /* Tables scroll inside themselves on narrow screens, never the page. */
+  .prose table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.92em;
+  }
+  .prose td code.inline {
+    white-space: nowrap;
+  }
+  .prose th,
+  .prose td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .prose th {
+    color: var(--text-mute);
+    font-weight: 500;
+  }
+  .prose .code {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  /* ---------- Motion preferences ---------- */
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurora::before,
+    .aurora::after,
+    .dot::after,
+    .caret {
+      animation: none !important;
+    }
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ---------- Print: a plain light page for buyers who print or present ---------- */
+
+  @media print {
+    :root {
+      --bg: #ffffff;
+      --surface-1: #ffffff;
+      --surface-2: #f4f4f6;
+      --line: #d4d4dc;
+      --line-strong: #b4b4c0;
+      --text: #111118;
+      --text-mute: #4a4a58;
+      --neon-cyan: #0e5f6e;
+      --neon-violet-soft: #5b21b6;
+    }
+    .grain,
+    .aurora,
+    .grid-lines,
+    .no-print,
+    header nav,
+    .spotlight::before {
+      display: none !important;
+    }
+    .gradient-text {
+      background: none !important;
+      color: #111118 !important;
+    }
+    .code pre {
+      white-space: pre-wrap;
+    }
+  }
+
+  /* ---------- Terminal ---------- */
+
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.15em;
+    margin-left: 1px;
+    vertical-align: text-bottom;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  /* Server-rendered final frame stays hidden until the client decides what to show. */
+  html.js .terminal-ssr {
+    visibility: hidden;
+  }
+}

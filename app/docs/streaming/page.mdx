@@ -1,0 +1,44 @@
+export const metadata = {
+  title: "Streaming",
+  description: "How Synapse streams tokens with server-sent events, and how to read them.",
+};
+
+<p className="eyebrow">docs · guides</p>
+
+# Streaming
+
+Set `"stream": true` and Synapse returns [server-sent events](https://html.spec.whatwg.org/multipage/server-sent-events.html) as tokens are generated. Time to first token is usually 90 to 400ms depending on the model; see the live p50 on the home page.
+
+## Event format
+
+Each event is a `data:` line holding one JSON object. The stream ends with `data: [DONE]`.
+
+```bash
+data: {"id":"chat_8f2k","delta":"Latency:","index":0}
+data: {"id":"chat_8f2k","delta":" the","index":0}
+data: {"id":"chat_8f2k","delta":" pause","index":0}
+data: {"id":"chat_8f2k","finish_reason":"stop","usage":{"input":14,"output":11}}
+data: [DONE]
+```
+
+## Reading the stream
+
+The SDKs turn events into an iterator, so you never parse lines yourself.
+
+```python
+stream = client.chat.create(model="syn-flash", messages=messages, stream=True)
+
+for chunk in stream:
+    if chunk.delta:
+        print(chunk.delta, end="", flush=True)
+
+print(stream.usage)  # Usage(input=14, output=11)
+```
+
+## Usage and billing
+
+The final event before `[DONE]` carries `usage`. You're billed for the tokens generated, even if you disconnect early, so stop generation with `max_tokens` rather than closing the socket.
+
+## Timeouts
+
+Idle streams are closed after 60 seconds without a token. Long generations are fine as long as tokens keep arriving. If you need longer-running work, use the Batch API.

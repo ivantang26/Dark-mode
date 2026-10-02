@@ -1,0 +1,45 @@
+import Link from "next/link";
+
+export const metadata = {
+  title: "Errors and rate limits",
+  description: "HTTP status codes, rate-limit headers and retry guidance for the Synapse API.",
+};
+
+<p className="eyebrow">docs · reference</p>
+
+# Errors and rate limits
+
+Every error has a JSON body with a stable `code` you can branch on, and a human-readable `message` you shouldn't.
+
+## Status codes
+
+| Status | Code | What to do |
+| --- | --- | --- |
+| `400` | `invalid_request` | Fix the request. The message names the field. |
+| `401` | `invalid_api_key` | Check `SYNAPSE_API_KEY` is set and not revoked. |
+| `404` | `model_not_found` | Check the model ID against the catalogue. |
+| `429` | `rate_limited` | Back off and retry after `retry-after` seconds. |
+| `500` | `server_error` | Retry with backoff. Check the status page if it persists. |
+| `503` | `overloaded` | Retry with backoff, or fall back to a smaller model. |
+
+## Rate-limit headers
+
+Every response tells you where you stand, so you can slow down before you're limited.
+
+```bash
+x-ratelimit-limit-requests: 500
+x-ratelimit-remaining-requests: 482
+x-ratelimit-limit-tokens: 400000
+x-ratelimit-remaining-tokens: 391220
+retry-after: 2
+```
+
+Limits depend on your tier and apply across all models. See the <Link href="/pricing#rate-limits">rate limit table</Link>.
+
+## Retrying
+
+The SDKs retry `429`, `500` and `503` twice with exponential backoff and jitter. To change that:
+
+```javascript
+const client = new Synapse({ maxRetries: 5, timeout: 30_000 });
+```
